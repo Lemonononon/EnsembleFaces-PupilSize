@@ -4,7 +4,7 @@ function main()
 
     %% 输入被试信息 
     prompt = {'编号','姓名','年龄','性别 (1=男, 2=女) '};
-    dlg_title = '被试信息';
+    dlg_title = '被试信息'; 
     num_line = [1 45;1 45;1 45;1 45];
     def_answer = {'','','',''};
     options = 'off';
@@ -29,11 +29,21 @@ function main()
     HideCursor;
 
     %打开窗口，设置参数
+    monitor.mon_width = Screen('DisplaySize',0)/10;   % horizontal dimension of viewable screen (cm)
+    monitor.v_dist = 60;   % viewing distance (cm)
     screenNumber=max(Screen('Screens'));
     %Screen('Resolution',screenNumber,1024,768,60);
     [wptr, wRect]=Screen('OpenWindow',screenNumber, 128,[],32,2);
     Screen(wptr,'BlendFunction',GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     [cx,cy]=WindowCenter(wptr);
+
+    ppd = round(pi * (wRect(3)-wRect(1)) / atan(monitor.mon_width/monitor.v_dist/2) / 360); % pixel per degree
+    
+    % 刺激宽、高的大小
+    sti_width = 2*ppd;
+    sti_height = 3*ppd;
+
+    sti_interval = 0.3*ppd; %刺激的间隙
 
     %设置按键
     KbName('UnifyKeyNames');                   %使用通用键位名称
@@ -71,16 +81,7 @@ function main()
     % for img_read_index = 1:50
     %     pic(img_read_index) = Screen('MakeTexture', wptr, imread( ['sti\P', num2str(img_read_index-1),'.png']) );
     % end
-    
-    % % 8个刺激的位置矩阵
-    % rect_sti{1} = [cx-100-55, cy - 140-70, cx-100+55, cy - 140 + 70];
-    % rect_sti{2} = [cx+100-55, cy - 140-70, cx+100+55, cy - 140 + 70];
-    % rect_sti{3} = [cx+140-55, cy - 100-70, cx+140+55, cy - 100 + 70];
-    % rect_sti{4} = [cx+140-55, cy + 100-70, cx+140+55, cy + 100 + 70];
-    % rect_sti{5} = [cx+100-55, cy + 140-70, cx+100+55, cy + 140 + 70];
-    % rect_sti{6} = [cx-100-55, cy + 140-70, cx-100+55, cy + 140 + 70];
-    % rect_sti{7} = [cx-140-55, cy + 100-70, cx-140+55, cy + 100 + 70];
-    % rect_sti{8} = [cx-140-55, cy - 100-70, cx-140+55, cy - 100 + 70];
+   
     
     % % 5*12*10
     % para_mean = [15 20 25 30 35]; %5
@@ -126,15 +127,16 @@ function main()
     % rect_sti{7} = [cx-280-55, cy + 200-70, cx-280+55, cy + 200 + 70];
     % rect_sti{8} = [cx-280-55, cy - 200-70, cx-280+55, cy - 200 + 70];
 
-    rect_sti{1} = [cx-130-55, cy - 280-70, cx-130+55, cy - 280 + 70];
-    rect_sti{2} = [cx+130-55, cy - 280-70, cx+130+55, cy - 280 + 70];
-    rect_sti{3} = [cx+280-55, cy - 130-70, cx+280+55, cy - 130 + 70];
-    rect_sti{4} = [cx+280-55, cy + 130-70, cx+280+55, cy + 130 + 70];
-    rect_sti{5} = [cx+130-55, cy + 280-70, cx+130+55, cy + 280 + 70];
-    rect_sti{6} = [cx-130-55, cy + 280-70, cx-130+55, cy + 280 + 70];
-    rect_sti{7} = [cx-280-55, cy + 130-70, cx-280+55, cy + 130 + 70];
-    rect_sti{8} = [cx-280-55, cy - 130-70, cx-280+55, cy - 130 + 70];
-    
+    rect_sti{1} = [cx-sti_interval/2-sti_width, cy-sti_interval*3/2-sti_height*2, cx-sti_interval/2, cy-sti_interval*3/2-sti_height];
+    rect_sti{2} = [cx+sti_interval/2, cy-sti_interval*3/2-sti_height*2, cx+sti_interval/2+sti_width, cy-sti_interval*3/2-sti_height];
+    rect_sti{3} = [cx+sti_interval*3/2+sti_width, cy-sti_interval/2-sti_height, cx+sti_interval*3/2+sti_width*2, cy-sti_interval/2];
+    rect_sti{4} = [cx+sti_interval*3/2+sti_width, cy+sti_interval/2, cx+sti_interval*3/2+sti_width*2, cy+sti_interval/2+sti_height];
+    rect_sti{5} = [cx+sti_interval/2, cy+sti_interval*3/2+sti_height, cx+sti_interval/2+sti_width, cy+sti_interval*3/2+sti_height*2];
+    rect_sti{6} = [cx-sti_interval/2-sti_width, cy+sti_interval*3/2+sti_height, cx-sti_interval/2, cy+sti_interval*3/2+sti_height*2];
+    rect_sti{7} = [cx-sti_interval*3/2-sti_width*2, cy+sti_interval/2, cx-sti_interval*3/2-sti_width, cy+sti_interval/2+sti_height];
+    rect_sti{8} = [cx-sti_interval*3/2-sti_width*2, cy-sti_interval/2-sti_height, cx-sti_interval*3/2-sti_width, cy-sti_interval/2];
+
+    rect_sti_second = [cx-sti_width/2, cy-sti_height/2, cx+sti_width/2, cy+sti_height/2]; %第二屏
     % 5*12*10
     para_mean = [15 20 25 30 35]; %5
     para_comp = [-2 2 -4 4 -6 6 -8 8 -10 10 -12 12]; % 12
@@ -143,7 +145,7 @@ function main()
 
     para_tmp = [x1(:), x2(:)];
     
-    sti_task = []
+    sti_task = [];
     for i = 1:8
         sti_task = [sti_task; para_tmp];
     end
@@ -193,11 +195,11 @@ function main()
                 for sti_idx = 1:8
                     x = mean+sti_mat(order(sti_idx))
                     Screen('DrawTexture', wptr, pic(mean+sti_mat(order(sti_idx))), [], rect_sti{sti_idx});
+                    % Screen('DrawTexture', wptr, pic(mean+sti_mat(order(sti_idx))), [], rect_sti{1});
                 end
 
                 Screen('Flip', wptr);
 
-                WaitSecs(1);
 
                 % 0.5s fix
                 Screen('TextFont',wptr,'Times New Roman');
@@ -206,51 +208,34 @@ function main()
                 WaitSecs(0.5);
 
                 
-                % 呈现第二屏刺激之后就可以反应
+                % 呈现第二屏刺激之后就可以反应, 3s超时
 
                 % Screen('DrawTexture', wptr);
-                Screen('DrawTexture', wptr, pic(mean+sti_task( index, 2 )));
+                Screen('DrawTexture', wptr, pic(mean+sti_task( index, 2 )), [], rect_sti_second);
                 % DrawFormattedText(wptr, 'Second!!!','center','center',[0, 0, 0]);
                 Screen('Flip',wptr);
 
                 t=GetSecs;
                 press = 100;
+
                 while true
-                    if GetSecs-t >= 0.5
-                        %TODO：呈现提醒被试判断的页面
-                        DrawFormattedText(wptr, 'F or J','center','center',[0, 0, 0]);
-                        Screen('Flip',wptr); 
-                        % Screen('Flip', wptr);
-                        [secs, kc, deltaSecs] = KbWait;
-                        % [yy,secs,kc]=KbCheck;
-                        if kc(key.J)
-                            reactiontime2=secs-t;
-                            press=0;
-                            break;
-                        elseif kc(key.F)
-                            reactiontime2=secs-t;
-                            press=1;
-                            break;
-                        elseif kc(key.escape)
-                            press=2;
-                            fclose(fid);
-                            ShowCursor;
-                            sca;
-                        end
+                    if GetSecs-t >= 3
+                        % 超时
+                        press = 0;
                         break;
                     end
                     
                     [yy,secs,kc]=KbCheck;
                     if kc(key.J)
                         reactiontime2=GetSecs-t;
-                        press=3;
+                        press=1;
                         break;
                     elseif kc(key.F)
                         reactiontime2=GetSecs-t;
-                        press=4;
+                        press=2;
                         break;
                     elseif kc(key.escape) 
-                        press = 5;
+                        press = 3;
                         fclose(fid);
                         ShowCursor;
                         sca;
@@ -466,42 +451,25 @@ function main()
 
                 t=GetSecs;
                 press = 100;
+
                 while true
-                    if GetSecs-t >= 0.5
-                        %TODO：呈现提醒被试判断的页面
-                        DrawFormattedText(wptr, 'F or J','center','center',[0, 0, 0]);
-                        Screen('Flip',wptr); 
-                        % Screen('Flip', wptr);
-                        [secs, kc, deltaSecs] = KbWait;
-                        % [yy,secs,kc]=KbCheck;
-                        if kc(key.J)
-                            reactiontime2=secs-t;
-                            press=0;
-                            break;
-                        elseif kc(key.F)
-                            reactiontime2=secs-t;
-                            press=1;
-                            break;
-                        elseif kc(key.escape)
-                            press=2;
-                            fclose(fid);
-                            ShowCursor;
-                            sca;
-                        end
+                    if GetSecs-t >= 3
+                        % 超时
+                        press = 0;
                         break;
                     end
                     
                     [yy,secs,kc]=KbCheck;
                     if kc(key.J)
                         reactiontime2=GetSecs-t;
-                        press=3;
+                        press=1;
                         break;
                     elseif kc(key.F)
                         reactiontime2=GetSecs-t;
-                        press=4;
+                        press=2;
                         break;
                     elseif kc(key.escape) 
-                        press = 5;
+                        press = 3;
                         fclose(fid);
                         ShowCursor;
                         sca;
@@ -591,4 +559,4 @@ end
 
     
     
-% end
+% end 
